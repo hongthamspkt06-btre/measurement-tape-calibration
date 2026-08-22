@@ -545,7 +545,9 @@ rebuildEmpIndex();
 // Rebuildable so a Refresh can pick up new factories added in the ID_List sheet.
 let FACTORY_LIST = [];
 function rebuildFactoryFilter(){
-  FACTORY_LIST = [...new Set(EMPLOYEES.map(e => e[2]))].sort((a, b) => a.localeCompare(b));
+  FACTORY_LIST = [...new Set(EMPLOYEES.map(e => e[2]))]
+    .filter(f => f !== 'Office')
+    .sort((a, b) => a.localeCompare(b));
   const sel = document.getElementById('factoryFilter');
   if (!sel) return;
   const prevValue = sel.value;
@@ -997,7 +999,6 @@ function updateTableScrollHeight(){
   const scrollBox = document.querySelector('.table-scroll');
   const theadEl = document.querySelector('#dataTable thead');
   if (!scrollBox || !theadEl) return;
-  scrollBox.scrollTop = 0;
   const headerH = theadEl.offsetHeight || 62;
   const trs = document.querySelectorAll('#tableBody tr');
   if (!trs.length){
