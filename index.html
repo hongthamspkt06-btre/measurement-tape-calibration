@@ -433,7 +433,17 @@
 
   <div class="tab-content" id="tabSummary">
     <div class="card">
-      <h2 class="chart-title-normal">Measurement tape calibration status <span class="chart-title-sub" id="statusChartDateLabel"></span></h2>
+      <h2 class="chart-title-normal">Measurement tape calibration status</h2>
+      <div class="summary-toolbar">
+        <div>
+          <label>Year</label>
+          <select id="statusYear"></select>
+        </div>
+        <div>
+          <label>Month</label>
+          <select id="statusMonth"></select>
+        </div>
+      </div>
       <div class="chart-box">
         <div id="statusChart"></div>
         <div class="summary-empty" id="statusChartEmpty" style="display:none;">No calibration data yet.</div>
@@ -1121,9 +1131,49 @@ function renderChartInto(wrap, viewBoxW, viewBoxH, innerMarkup, legendMarkup){
 }
 
 function renderSummaryTab(){
+  populateStatusDropdowns();
   renderStatusChart();
   populateCmpDropdowns();
   renderComparisonChart();
+}
+
+let statusAutoTrackedDate = null; // last Calibration Date the Status Year/Month dropdowns were auto-jumped to
+
+// Populate the Year/Month dropdowns for the Status chart. Defaults to the most recent
+// Year/Month with data whenever a new (later) Calibration Date shows up; otherwise keeps
+// whatever the user currently has selected.
+function populateStatusDropdowns(){
+  const dates = getDistinctCalDatesSorted();
+  const yearSel = $('statusYear');
+  const monthSel = $('statusMonth');
+  if (!dates.length){
+    yearSel.innerHTML = ''; monthSel.innerHTML = '';
+    statusAutoTrackedDate = null;
+    return;
+  }
+  const yearsSet = new Set();
+  dates.forEach(d => yearsSet.add(new Date(d + 'T00:00:00').getFullYear()));
+  const years = [...yearsSet].sort((a,b) => a-b);
+  const prevYear = yearSel.value;
+  const prevMonth = monthSel.value;
+  yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (!monthSel.innerHTML){
+    monthSel.innerHTML = MONTH_NAMES.map((name, idx) => `<option value="${idx+1}">${name}</option>`).join('');
+  }
+
+  const latestDate = dates[dates.length - 1];
+  const latestDt = new Date(latestDate + 'T00:00:00');
+
+  if (latestDate !== statusAutoTrackedDate){
+    // Có Calibration Date mới -> tự động nhảy Year/Month về tháng/năm mới nhất.
+    statusAutoTrackedDate = latestDate;
+    yearSel.value = String(latestDt.getFullYear());
+    monthSel.value = String(latestDt.getMonth() + 1);
+  } else {
+    // Không có dữ liệu mới -> giữ nguyên lựa chọn hiện tại của người dùng.
+    yearSel.value = years.map(String).includes(prevYear) ? prevYear : String(latestDt.getFullYear());
+    if (prevMonth) monthSel.value = prevMonth;
+  }
 }
 
 // Top chart: "Measurement Tape Calibration Status" for the most recent Calibration Date.
@@ -1138,15 +1188,18 @@ function renderStatusChart(){
   const emptyEl = $('statusChartEmpty');
   const wrap = $('statusChart');
   if (!dates.length){
-    $('statusChartDateLabel').textContent = '';
     wrap.innerHTML = ''; wrap.style.display = 'none'; emptyEl.style.display = 'block';
     return;
   }
   wrap.style.display = 'block'; emptyEl.style.display = 'none';
 
-  const latestDate = dates[dates.length - 1];
-  $('statusChartDateLabel').textContent = '— ' + latestDate;
-  const latestRows = rows.filter(r => r.calDate === latestDate);
+  const year = Number($('statusYear').value);
+  const month = Number($('statusMonth').value);
+  const latestRows = rows.filter(r => {
+    if (!r.calDate) return false;
+    const dt = new Date(r.calDate + 'T00:00:00');
+    return dt.getFullYear() === year && (dt.getMonth() + 1) === month;
+  });
   const factories = chartFactories(latestRows.map(r => factoryForChart(r)));
 
   if (!factories.length){
@@ -1373,6 +1426,9 @@ function renderComparisonChart(){
   const legendMarkup = series.map(s => `<span class="item"><span class="swatch" style="background:${s.color};"></span>${esc(s.label)}</span>`).join('');
   renderChartInto(wrap, W, H, innerMarkup, legendMarkup);
 }
+
+$('statusYear').addEventListener('change', renderStatusChart);
+$('statusMonth').addEventListener('change', renderStatusChart);
 
 $('cmpYear').addEventListener('change', renderComparisonChart);
 $('cmpMonthA').addEventListener('change', renderComparisonChart);
