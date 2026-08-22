@@ -3,12 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>USV Mesurement Tape Calibration</title>
-<!-- ExcelJS (~1MB) đã được BỎ khỏi đây. Trước đây script này chặn (block)
-     toàn bộ việc parse/render trang cho tới khi tải + chạy xong file JS
-     nặng ~1MB này, dù nó chỉ được dùng khi bấm nút "Export". Giờ được
-     tải "lazy" (chỉ tải khi cần) bằng loadExcelJS() ở phần <script> bên
-     dưới, giúp trang hiện ra và bắt đầu gọi API lấy dữ liệu ngay lập tức
-     thay vì phải đợi ExcelJS tải xong trước. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
     --blue-dark:#1F3864;
@@ -427,8 +422,7 @@
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
-      <div class="empty-note" id="emptyNote" style="display:none;">No entries yet.</div>
-      <div class="empty-note" id="loadingNote">Loading data from server...</div>
+      <div class="empty-note" id="emptyNote">No entries yet.</div>
     </div>
     <div class="actions">
       <button class="secondary" id="resetAllBtn">Clear All</button>
@@ -573,7 +567,7 @@ let currentResult = "Blank";
 // ---- Backend API (Google Apps Script Web App, deployed as JSON API — see Code.gs) ----
 // Dán URL Web App dạng https://script.google.com/macros/s/XXXXXXXX/exec vào đây
 // sau khi deploy Code.gs (Deploy > New deployment > Web app > Execute as Me > Anyone).
-const API_URL = 'https://script.google.com/macros/s/AKfycbycMwSgiS7dxSLaP_kfC8aorjr8JRX1RS4AliNMfmQQbnw0DOK0OKCQyFpn2xneEgM4mQ/exec';
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 function apiGet(action){
   // Cache-busting: nếu không có tham số này, một số trình duyệt/CDN có thể trả về
@@ -853,8 +847,6 @@ applyResultLogic();
 function loadFromServer(cb){
   apiGet('getInitialData')
     .then(data => {
-      const loadingNote = $('loadingNote');
-      if (loadingNote) loadingNote.remove();
       rows = data.rows || [];
       signStates = data.signStates || {};
       EMPLOYEES = (data.idList || [])
@@ -873,8 +865,6 @@ function loadFromServer(cb){
       if (typeof cb === 'function') cb();
     })
     .catch(err => {
-      const loadingNote = $('loadingNote');
-      if (loadingNote) loadingNote.remove();
       showStatus('Load error: ' + (err && err.message ? err.message : err), 'err');
       if (typeof cb === 'function') cb();
     });
@@ -1151,7 +1141,8 @@ function renderStatusChart(){
   }
 
   const countFor = (result) => factories.map(f =>
-    latestRows.filter(r => factoryForChart(r) === f && r.result === result).length
+    latestRows.filter(r => factoryForChart(r) === f && r.result === result)
+      .reduce((s, r) => s + Number(r.qty || 0), 0)
   );
   const passC = countFor('Pass'), failC = countFor('Fail'), blankC = countFor('Blank');
   const totalQty = factories.map(f =>
@@ -1204,7 +1195,7 @@ function renderStatusChart(){
       const bx = cx - (barW * 1.5) + j * (barW + 4);
       const by = yCount(val);
       const bh = baseline - by;
-      barsSvg += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" fill="${color}" rx="2"><title>${esc(f)} — ${label}: ${val}</title></rect>`;
+      barsSvg += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" fill="${color}" rx="2"><title>${esc(f)} — ${label} Qty: ${val}</title></rect>`;
       if (val > 0) barsSvg += `<text class="value-label" x="${(bx+barW/2).toFixed(1)}" y="${(by-4).toFixed(1)}">${val}</text>`;
     });
     labelsSvg += `<text class="axis-label" x="${cx.toFixed(1)}" y="${(baseline+16).toFixed(1)}" text-anchor="middle">${esc(f)}</text>`;
@@ -1516,28 +1507,9 @@ function buildFactorySheet(wb, sheetName, factoryRows){
   }
 }
 
-// ExcelJS chỉ cần thiết khi bấm Export, nên được tải "lazy" (on-demand)
-// tại đây thay vì chặn (block) toàn bộ trang lúc mở file — xem ghi chú ở
-// thẻ <head>. Nếu đã tải rồi thì dùng lại promise cũ, không tải lại.
-let exceljsLoadPromise = null;
-function loadExcelJS(){
-  if (window.ExcelJS) return Promise.resolve();
-  if (exceljsLoadPromise) return exceljsLoadPromise;
-  exceljsLoadPromise = new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error('Failed to load ExcelJS'));
-    document.head.appendChild(s);
-  });
-  return exceljsLoadPromise;
-}
-
 $('exportBtnTop').addEventListener('click', async () => {
   if (!rows.length){ showStatus('No entries to export.', 'err'); return; }
   try {
-    showStatus('Preparing export...', 'ok');
-    await loadExcelJS();
     const wb = new ExcelJS.Workbook();
 
     // Always split the export by Factory — one worksheet per Factory.
