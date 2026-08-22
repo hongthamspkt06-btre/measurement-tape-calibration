@@ -264,6 +264,11 @@
   /* Summary tab */
   .summary-toolbar{display:flex;gap:14px;align-items:end;margin-bottom:14px;flex-wrap:wrap;}
   .summary-toolbar>div{min-width:130px;}
+  .chart-title-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .chart-title-row h2.chart-title-normal{margin:0;}
+  .inline-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .inline-toolbar label{font-size:12px;color:#5b6b82;font-weight:600;}
+  .inline-toolbar select{padding:5px 8px;font-size:12.5px;min-width:90px;}
   .chart-box{position:relative;width:100%;}
   .chart-title-sub{font-weight:400;text-transform:none;color:#8a94a6;font-size:14px;margin-left:6px;letter-spacing:0;}
   .card h2.chart-title-normal{text-transform:none;font-size:19px;}
@@ -433,14 +438,12 @@
 
   <div class="tab-content" id="tabSummary">
     <div class="card">
-      <h2 class="chart-title-normal">Measurement tape calibration status</h2>
-      <div class="summary-toolbar">
-        <div>
-          <label>Year</label>
+      <div class="chart-title-row">
+        <h2 class="chart-title-normal">Measurement tape calibration status</h2>
+        <div class="inline-toolbar">
+          <label for="statusYear">Year</label>
           <select id="statusYear"></select>
-        </div>
-        <div>
-          <label>Month</label>
+          <label for="statusMonth">Month</label>
           <select id="statusMonth"></select>
         </div>
       </div>
