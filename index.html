@@ -569,12 +569,16 @@ let currentResult = "Blank";
 // sau khi deploy Code.gs (Deploy > New deployment > Web app > Execute as Me > Anyone).
 const API_URL = 'https://script.google.com/macros/s/AKfycbycMwSgiS7dxSLaP_kfC8aorjr8JRX1RS4AliNMfmQQbnw0DOK0OKCQyFpn2xneEgM4mQ/exec';
 
-function apiGet(action){
+function apiGet(action, extraParams){
   // Cache-busting: nếu không có tham số này, một số trình duyệt/CDN có thể trả về
   // response GET đã cache cho cùng URL, khiến nút Refresh trông như không hoạt động
   // dù thực chất dữ liệu không hề được tải lại từ Google Sheet.
   const bust = '&_=' + Date.now();
-  return fetch(API_URL + '?action=' + encodeURIComponent(action) + bust, { cache: 'no-store' })
+  let extra = '';
+  if (extraParams){
+    for (const k in extraParams) extra += '&' + k + '=' + encodeURIComponent(extraParams[k]);
+  }
+  return fetch(API_URL + '?action=' + encodeURIComponent(action) + extra + bust, { cache: 'no-store' })
     .then(res => res.json())
     .then(json => {
       if (!json.ok) throw new Error(json.error || 'API error');
@@ -844,8 +848,8 @@ function applyResultLogic(){
 applyResultLogic();
 
 // ---- Load / sync data from the Google Sheet backend ----
-function loadFromServer(cb){
-  apiGet('getInitialData')
+function loadFromServer(cb, bypassCache){
+  apiGet('getInitialData', bypassCache ? { bypassCache: 1 } : null)
     .then(data => {
       rows = data.rows || [];
       signStates = data.signStates || {};
@@ -1040,7 +1044,7 @@ $('refreshBtn').addEventListener('click', () => {
     const activeTab = document.querySelector('.tab-content.active');
     if (activeTab && activeTab.id === 'tabSummary') renderSummaryTab();
     showStatus('Refreshed.', 'ok');
-  });
+  }, true);
 });
 
 // ---- Summary tab: charts (hand-built SVG, no external chart library needed) ----
