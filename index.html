@@ -26,7 +26,7 @@
     color:#1a1a2e;
   }
   input,select,button,textarea{font-family:inherit;}
-  .wrap{max-width:1200px;margin:0 auto;}
+  .wrap{max-width:1188px;margin:0 auto;}
   .titlebar{
     display:flex;align-items:center;justify-content:space-between;
     background:#1B3A63;
@@ -40,10 +40,10 @@
     background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:4.76mm;
     box-shadow:0 2px 8px rgba(20,30,60,0.06);border:1px solid var(--border);
   }
-  .card h2{font-size:12px;margin:0 0 12px;color:var(--blue-dark);letter-spacing:.3px;text-transform:uppercase;}
+  .card h2{font-size:12px;margin:0 0 12px;color:var(--blue-dark);letter-spacing:.3px;text-transform:none;}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-  .grid-gen{display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:14px;align-items:end;}
+  .grid-gen{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;}
   label{display:block;font-size:12px;font-weight:600;color:#4a5568;margin-bottom:5px;}
   input[type=text],input[type=date],select,input[type=number]{
     width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;
@@ -199,6 +199,96 @@
   .sig-comment-note{font-size:11px;color:var(--fail);text-align:center;padding:0 6px;margin-top:6px;}
   .sig-unlock-link{font-size:10.5px;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:4px;background:none;border:none;padding:0;}
 
+  /* Bottom Sign Status card */
+  .signstatus-row{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+    min-height:20px;
+  }
+  .signstatus-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .signstatus-badge{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;
+    font-size:12.5px;font-weight:700;white-space:nowrap;letter-spacing:.2px;
+  }
+  .signstatus-badge .signstatus-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;}
+  .signstatus-badge .signstatus-icon{font-size:11px;font-weight:700;display:inline-block;line-height:1;}
+  .signstatus-badge.pending{background:#fbecd2;color:#b45309;}
+  .signstatus-badge.approved{background:#e6f4ea;color:var(--pass);}
+  .signstatus-badge.notsigned{background:#fdecea;color:var(--fail);}
+  .signstatus-sub{font-size:12.5px;color:#7c848d;}
+  .signstatus-sig-img{max-height:30px;object-fit:contain;}
+  .signstatus-sig-cluster{display:flex;align-items:center;gap:8px;}
+  .signstatus-sig-meta{display:flex;flex-direction:column;line-height:1.3;}
+  .signstatus-sig-name{font-size:12.5px;font-weight:700;color:#1f2937;}
+  .signstatus-sig-date{font-size:11px;color:#8a94a6;}
+  .signstatus-btn{
+    background:#2f6fed;color:#fff;border:none;padding:10px 22px;border-radius:8px;
+    font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+    white-space:nowrap;transition:.15s;
+  }
+  .signstatus-btn:hover{background:#2159c9;}
+  .signstatus-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .signstatus-choice-btn{
+    padding:10px 20px;border-radius:8px;border:none;font-weight:700;font-size:12.5px;
+    cursor:pointer;color:#fff;display:inline-flex;align-items:center;gap:7px;transition:.15s;white-space:nowrap;
+  }
+  .signstatus-choice-btn.approve{background:var(--pass);}
+  .signstatus-choice-btn.approve:hover{background:#187a35;}
+  .signstatus-choice-btn.notsign{background:var(--fail);}
+  .signstatus-choice-btn.notsign:hover{background:#b8281b;}
+  .signstatus-cancel-link{
+    font-size:12.5px;color:#9aa0a6;text-decoration:underline;cursor:pointer;
+    background:none;border:none;padding:0;font-weight:600;white-space:nowrap;
+  }
+  .signstatus-cancel-link:hover{color:#767d87;}
+  .signstatus-unlock-btn{
+    background:#fff;color:var(--blue-dark);border:1.5px solid var(--blue-dark);padding:8px 18px;
+    border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;transition:.15s;
+  }
+  .signstatus-unlock-btn:hover{background:#eef3fa;}
+  .signstatus-comment-wrap{display:flex;flex-direction:column;gap:12px;width:100%;}
+  .signstatus-comment-wrap textarea{
+    width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;
+    font-family:inherit;resize:vertical;min-height:64px;
+  }
+  .signstatus-comment-actions{display:flex;align-items:center;gap:16px;justify-content:flex-end;}
+  .signstatus-submit-btn{
+    background:#2f6fed;color:#fff;border:none;padding:9px 22px;border-radius:8px;
+    font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .signstatus-submit-btn:hover{background:#2159c9;}
+  .signstatus-quote{color:var(--accent);}
+
+  /* Inline password box (Sign-Off / Unlock gate) */
+  .signstatus-passbox{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:#fdf3e0;border:1.5px solid #f0c36d;border-radius:8px;padding:9px 14px;
+  }
+  .signstatus-passbox label{
+    color:#b45309;font-weight:700;font-size:12.5px;white-space:nowrap;margin:0;
+  }
+  .signstatus-passbox input[type=password]{
+    padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+    font-size:12px;width:170px;background:#fff;
+  }
+  .signstatus-pass-actions{display:flex;align-items:center;gap:12px;}
+  .signstatus-pass-err{color:var(--fail);font-size:11.5px;width:100%;display:none;}
+  .signstatus-pass-err.show{display:block;}
+
+  /* Inline comment box (Not Sign w/Comment) */
+  .signstatus-commentbox{
+    display:flex;flex-direction:column;gap:8px;
+    background:#fdecea;border:1.5px solid #f3b4ad;border-radius:8px;padding:12px 14px;
+    min-width:260px;flex:1;max-width:420px;
+  }
+  .signstatus-commentbox label{
+    color:var(--fail);font-weight:700;font-size:12.5px;margin:0;
+  }
+  .signstatus-commentbox textarea{
+    width:100%;min-height:60px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+    font-size:12px;font-family:inherit;resize:vertical;background:#fff;
+  }
+  .signstatus-commentbox .signstatus-comment-actions{display:flex;justify-content:flex-end;gap:16px;align-items:center;}
+
   /* Password / comment modal extras */
   .modal-box input[type=password], .modal-box textarea{
     width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;
@@ -322,14 +412,6 @@
       <div>
         <label>Checked By</label>
         <input type="text" id="checkedBy" placeholder="Checker name">
-      </div>
-      <div>
-        <label>Approved By <span style="font-weight:400;color:#8a94a6;">(per Calibration Date)</span></label>
-        <div class="sig-box" id="sigBox">
-          <div id="sigArea">
-            <button type="button" class="primary sig-sign-btn" id="signBtn"><span class="ico">&#128274;</span>Sign as Kim Joo Shik</button>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -482,6 +564,17 @@
     </div>
   </div>
   <!-- /#tabSummary -->
+
+  <div class="card card-compact-30" id="signOffCard">
+    <h2>Sign Status</h2>
+    <div class="signstatus-row" id="signOffBox">
+      <div class="signstatus-left">
+        <span class="signstatus-badge pending"><span class="signstatus-dot"></span>PENDING SIGN-OFF</span>
+        <span class="signstatus-sub">QA Senior Manager: Kim Joo Shik</span>
+      </div>
+      <button type="button" class="signstatus-btn" id="signOffTriggerBtn"><span class="ico">&#9998;</span>Sign-Off</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -490,41 +583,6 @@
     <div class="modal-actions">
       <button class="modal-yes" id="modalYes">Yes</button>
       <button class="modal-no" id="modalNo">No</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="passModalOverlay">
-  <div class="modal-box">
-    <p id="passModalText">Enter password to sign as Kim Joo Shik</p>
-    <input type="password" id="passModalInput" placeholder="Password" autocomplete="off">
-    <div class="modal-err" id="passModalErr">Incorrect password. Please try again.</div>
-    <div class="modal-actions">
-      <button class="modal-yes" id="passModalOk">Confirm</button>
-      <button class="modal-no" id="passModalCancel">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="choiceModalOverlay">
-  <div class="modal-box">
-    <p>Approved by</p>
-    <div class="modal-choice-actions">
-      <button class="modal-done-btn" id="choiceDoneBtn"><span class="ico">&#9989;</span>Done</button>
-      <button class="modal-secondary-btn" id="choiceCommentBtn"><span class="ico">&#9998;</span>Not Sign<br>w/Comment</button>
-    </div>
-    <button type="button" class="modal-choice-cancel" id="choiceCancelBtn">Cancel</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="commentModalOverlay">
-  <div class="modal-box">
-    <p>Reason for not signing</p>
-    <textarea id="commentModalInput" placeholder="Enter comment..."></textarea>
-    <div class="modal-err" id="commentModalErr">Please enter a comment.</div>
-    <div class="modal-actions">
-      <button class="modal-yes" id="commentModalOk">Submit</button>
-      <button class="modal-no" id="commentModalCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -655,112 +713,155 @@ $('modalNo').addEventListener('click', () => {
 });
 
 // ---- Signature stamp / Approved by workflow ----
-let passModalPurpose = null; // 'sign' | 'unlock'
-
-function showPassModal(purpose, text){
-  passModalPurpose = purpose;
-  $('passModalText').textContent = text;
-  $('passModalInput').value = '';
-  $('passModalErr').classList.remove('show');
-  $('passModalOverlay').classList.add('show');
-  setTimeout(() => $('passModalInput').focus(), 50);
-}
-function hidePassModal(){
-  $('passModalOverlay').classList.remove('show');
-  passModalPurpose = null;
-}
-$('passModalCancel').addEventListener('click', hidePassModal);
-$('passModalOk').addEventListener('click', handlePassModalConfirm);
-$('passModalInput').addEventListener('keydown', e => { if (e.key === 'Enter') handlePassModalConfirm(); });
-
-function handlePassModalConfirm(){
-  const val = $('passModalInput').value;
-  if (val !== MANAGER_PASSWORD){
-    $('passModalErr').classList.add('show');
-    return;
-  }
-  const purpose = passModalPurpose;
-  hidePassModal();
-  if (purpose === 'sign'){
-    $('choiceModalOverlay').classList.add('show');
-  } else if (purpose === 'unlock'){
-    const date = $('calDate').value;
-    signStates[date] = { status: 'unsigned', comment: '', date: '' };
-    signState = signStates[date];
-    renderSignature();
-    updateLockUI();
-    apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
-  }
+function nowDateTime(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-$('choiceDoneBtn').addEventListener('click', () => {
-  $('choiceModalOverlay').classList.remove('show');
-  const date = $('calDate').value;
-  const today = new Date().toISOString().slice(0,10);
-  signStates[date] = { status: 'signed', comment: '', date: today };
-  signState = signStates[date];
-  renderSignature();
-  updateLockUI();
-  apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
-});
-$('choiceCommentBtn').addEventListener('click', () => {
-  $('choiceModalOverlay').classList.remove('show');
-  $('commentModalInput').value = '';
-  $('commentModalErr').classList.remove('show');
-  $('commentModalOverlay').classList.add('show');
-  setTimeout(() => $('commentModalInput').focus(), 50);
-});
-$('choiceCancelBtn').addEventListener('click', () => {
-  $('choiceModalOverlay').classList.remove('show');
-});
-$('commentModalCancel').addEventListener('click', () => {
-  $('commentModalOverlay').classList.remove('show');
-});
-$('commentModalOk').addEventListener('click', () => {
-  const val = $('commentModalInput').value.trim();
-  if (!val){
-    $('commentModalErr').classList.add('show');
-    return;
-  }
-  $('commentModalOverlay').classList.remove('show');
-  const date = $('calDate').value;
-  const today = new Date().toISOString().slice(0,10);
-  signStates[date] = { status: 'commented', comment: val, date: today };
-  signState = signStates[date];
-  renderSignature();
-  updateLockUI();
-  apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
-});
+// ---- Bottom Sign Status card (drives the same per-Calibration-Date signStates model) ----
+const SIGNOFF_MANAGER_NAME = 'Kim Joo Shik';
 
-function renderSignature(){
-  const area = $('sigArea');
+// Left-side markup fragments reused across states (badge + sub text / signature).
+function signOffLeftPending(){
+  return `
+    <div class="signstatus-left">
+      <span class="signstatus-badge pending"><span class="signstatus-dot"></span>PENDING SIGN-OFF</span>
+      <span class="signstatus-sub">QA Senior Manager: ${SIGNOFF_MANAGER_NAME}</span>
+    </div>`;
+}
+function signOffLeftSigned(){
+  return `
+    <div class="signstatus-left">
+      <span class="signstatus-badge approved"><span class="signstatus-icon">&#10003;</span>SIGNED OFF</span>
+      <div class="signstatus-sig-cluster">
+        <img class="signstatus-sig-img" src="data:image/png;base64,${SIGNATURE_B64}" alt="Signature">
+        <div class="signstatus-sig-meta">
+          <span class="signstatus-sig-name">${SIGNOFF_MANAGER_NAME}</span>
+          <span class="signstatus-sig-date">${signState.date}</span>
+        </div>
+      </div>
+    </div>`;
+}
+function signOffLeftCommented(){
+  return `
+    <div class="signstatus-left">
+      <span class="signstatus-badge notsigned"><span class="signstatus-icon">&#10007;</span>NOT SIGNED</span>
+      <span class="signstatus-sub signstatus-quote">&ldquo;${signState.comment.replace(/</g,'&lt;')}&rdquo;</span>
+    </div>`;
+}
+
+function renderSignOff(){
+  const box = $('signOffBox');
   if (signState.status === 'unsigned'){
-    area.innerHTML = '<button type="button" class="primary sig-sign-btn" id="signBtn"><span class="ico">&#128274;</span>Sign as Kim Joo Shik</button>';
-    $('signBtn').addEventListener('click', () => {
+    box.innerHTML = signOffLeftPending() +
+      `<button type="button" class="signstatus-btn" id="signOffTriggerBtn"><span class="ico">&#9998;</span>Sign-Off</button>`;
+    $('signOffTriggerBtn').addEventListener('click', () => {
       if (!$('calDate').value){
-        showStatus('Please select a Calibration Date before signing.', 'err');
+        showStatus('Please select a Calibration Date before signing off.', 'err');
         return;
       }
-      showPassModal('sign', 'Enter password to sign as Kim Joo Shik');
+      renderSignOffPassGate('signoff');
     });
   } else if (signState.status === 'signed'){
-    area.innerHTML = `
-      <div class="sig-display">
-        <img class="sig-stamp-img" src="data:image/png;base64,${SIGNATURE_B64}" alt="Signature">
-        <div class="sig-date">${signState.date}</div>
-        <button type="button" class="sig-unlock-link" id="unlockBtn">Unlock</button>
-      </div>`;
-    $('unlockBtn').addEventListener('click', () => showPassModal('unlock', 'Enter password to unlock signature'));
+    box.innerHTML = signOffLeftSigned() +
+      `<button type="button" class="signstatus-unlock-btn" id="signOffUnlockBtn"><span class="ico">&#128274;</span>Unlock</button>`;
+    $('signOffUnlockBtn').addEventListener('click', () => renderSignOffPassGate('unlock'));
   } else if (signState.status === 'commented'){
-    area.innerHTML = `
-      <div class="sig-display">
-        <div class="sig-comment-note">Not Signed: ${signState.comment.replace(/</g,'&lt;')}</div>
-        <button type="button" class="sig-unlock-link" id="unlockBtn">Unlock</button>
-      </div>`;
-    $('unlockBtn').addEventListener('click', () => showPassModal('unlock', 'Enter password to unlock signature'));
+    box.innerHTML = signOffLeftCommented() +
+      `<button type="button" class="signstatus-unlock-btn" id="signOffUnlockBtn"><span class="ico">&#128274;</span>Unlock</button>`;
+    $('signOffUnlockBtn').addEventListener('click', () => renderSignOffPassGate('unlock'));
   }
 }
-renderSignature();
+
+// Inline password gate, shown to the right of the current Sign Status while it's active.
+// purpose: 'signoff' (gates entry into the Approve / Not-Sign choice) | 'unlock' (gates resetting to Pending)
+function renderSignOffPassGate(purpose){
+  const box = $('signOffBox');
+  const leftHtml = purpose === 'signoff' ? signOffLeftPending()
+    : (signState.status === 'signed' ? signOffLeftSigned() : signOffLeftCommented());
+  const label = purpose === 'signoff' ? 'Password:' : 'Password to unlock:';
+  box.innerHTML = leftHtml + `
+    <div class="signstatus-passbox">
+      <label for="signOffPassInput">${label}</label>
+      <input type="password" id="signOffPassInput" placeholder="Password" autocomplete="off">
+      <div class="signstatus-pass-actions">
+        <button type="button" class="signstatus-submit-btn" id="signOffPassConfirmBtn">Confirm</button>
+        <button type="button" class="signstatus-cancel-link" id="signOffPassCancelBtn">Cancel</button>
+      </div>
+      <div class="signstatus-pass-err" id="signOffPassErr">Incorrect password. Please try again.</div>
+    </div>`;
+  setTimeout(() => $('signOffPassInput').focus(), 50);
+  $('signOffPassCancelBtn').addEventListener('click', renderSignOff);
+  const confirm = () => {
+    const val = $('signOffPassInput').value;
+    if (val !== MANAGER_PASSWORD){
+      $('signOffPassErr').classList.add('show');
+      return;
+    }
+    if (purpose === 'signoff'){
+      renderSignOffChoice();
+    } else {
+      const date = $('calDate').value;
+      signStates[date] = { status: 'unsigned', comment: '', date: '' };
+      signState = signStates[date];
+      renderSignOff();
+      updateLockUI();
+      apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
+    }
+  };
+  $('signOffPassConfirmBtn').addEventListener('click', confirm);
+  $('signOffPassInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirm(); });
+}
+
+function renderSignOffChoice(){
+  const box = $('signOffBox');
+  box.innerHTML = signOffLeftPending() + `
+    <div class="signstatus-actions">
+      <button type="button" class="signstatus-choice-btn approve" id="signOffApproveBtn"><span class="ico">&#9989;</span>Approved</button>
+      <button type="button" class="signstatus-choice-btn notsign" id="signOffNotSignBtn"><span class="ico">&#9998;</span>Not Sign w/Comment</button>
+      <button type="button" class="signstatus-cancel-link" id="signOffChoiceCancelBtn">Cancel</button>
+    </div>`;
+  $('signOffApproveBtn').addEventListener('click', () => {
+    const date = $('calDate').value;
+    signStates[date] = { status: 'signed', comment: '', date: nowDateTime() };
+    signState = signStates[date];
+    renderSignOff();
+    updateLockUI();
+    apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
+  });
+  $('signOffNotSignBtn').addEventListener('click', renderSignOffCommentForm);
+  $('signOffChoiceCancelBtn').addEventListener('click', renderSignOff);
+}
+
+function renderSignOffCommentForm(){
+  const box = $('signOffBox');
+  box.innerHTML = signOffLeftPending() + `
+    <div class="signstatus-commentbox">
+      <label for="signOffCommentInput">Comment:</label>
+      <textarea id="signOffCommentInput" placeholder="Enter comment..."></textarea>
+      <div class="signstatus-comment-actions">
+        <button type="button" class="signstatus-submit-btn" id="signOffCommentSubmitBtn">Submit</button>
+        <button type="button" class="signstatus-cancel-link" id="signOffCommentCancelBtn">Cancel</button>
+      </div>
+    </div>`;
+  setTimeout(() => $('signOffCommentInput').focus(), 50);
+  $('signOffCommentCancelBtn').addEventListener('click', renderSignOff);
+  $('signOffCommentSubmitBtn').addEventListener('click', () => {
+    const val = $('signOffCommentInput').value.trim();
+    if (!val){
+      $('signOffCommentInput').focus();
+      return;
+    }
+    const date = $('calDate').value;
+    signStates[date] = { status: 'commented', comment: val, date: nowDateTime() };
+    signState = signStates[date];
+    renderSignOff();
+    updateLockUI();
+    apiPost('saveSignState', { calDate: date, state: signStates[date] }).catch(err => showStatus('Sync error: ' + (err && err.message ? err.message : err), 'err'));
+  });
+}
+renderSignOff();
 
 // ---- Lock entry when the selected Calibration Date has been Approved (Done) ----
 const LOCKABLE_FIELD_IDS = ['empId','qty','remark','tapeConditionSelect','tapeConditionDisplay','recalDate','checkedBy'];
@@ -777,12 +878,12 @@ function updateLockUI(){
   renderTable(); // refresh so delete buttons reflect locked rows too
 }
 
-// Calibration Date drives which Approved-by state (per date) is shown, and locks
-// the Entry card once that date has already been Approved (Done).
+// Calibration Date drives which Sign-Off state (per date) is shown, and locks
+// the Entry card once that date has already been Approved.
 $('calDate').addEventListener('change', () => {
   const date = $('calDate').value;
   signState = getSignState(date);
-  renderSignature();
+  renderSignOff();
   updateLockUI();
 });
 
@@ -884,7 +985,7 @@ function loadFromServer(cb, bypassCache){
       rebuildFactoryFilter();
       const date = $('calDate').value;
       signState = getSignState(date);
-      renderSignature();
+      renderSignOff();
       updateLockUI();
       renderTable();
       if (typeof cb === 'function') cb();
