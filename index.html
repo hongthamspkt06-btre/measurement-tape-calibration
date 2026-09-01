@@ -646,6 +646,18 @@ let currentResult = "Blank";
 // sau khi deploy Code.gs (Deploy > New deployment > Web app > Execute as Me > Anyone).
 const API_URL = 'https://script.google.com/macros/s/AKfycbycMwSgiS7dxSLaP_kfC8aorjr8JRX1RS4AliNMfmQQbnw0DOK0OKCQyFpn2xneEgM4mQ/exec';
 
+// Dùng để đọc nhanh trực tiếp từ 1 Google Sheet CÔNG KHAI RIÊNG (bản snapshot rút gọn,
+// KHÔNG phải Sheet chính chứa dữ liệu gốc) làm lớp "cache dùng chung" cho MỌI người
+// dùng — xem hàm fetchSharedSnapshot() bên dưới. Sheet chính (SPREADSHEET_ID trong
+// Code.gs) vẫn giữ nguyên riêng tư, KHÔNG cần chia sẻ công khai.
+// Cách lấy ID: tạo 1 Google Sheet mới trống, làm theo hướng dẫn ở đầu hàm
+// refreshPublicSnapshot() trong Code.gs, rồi dán ID (đoạn giữa /d/ và /edit trên URL)
+// của Sheet CÔNG KHAI đó (không phải Sheet chính) vào biến bên dưới.
+const PUBLIC_SNAPSHOT_SPREADSHEET_ID = '1Fsm0_7oveY9VWOO0sCTOAdTHX7pxtDRtxHXUE2-ZEr4'; // Google Sheet ID
+const SHEET_ENTRIES = 'Entries';
+const SHEET_SIGNSTATES = 'SignStates';
+const SHEET_IDLIST = 'ID_List';
+
 function apiGet(action, extraParams){
   // Cache-busting: nếu không có tham số này, một số trình duyệt/CDN có thể trả về
   // response GET đã cache cho cùng URL, khiến nút Refresh trông như không hoạt động
@@ -968,24 +980,157 @@ function applyResultLogic(){
 applyResultLogic();
 
 // ---- Load / sync data from the Google Sheet backend ----
+// Chiến lược "stale-while-revalidate": lần mở trang kế tiếp hiển thị NGAY
+// dữ liệu đã lưu ở lần trước (localStorage) — không cần chờ mạng/Apps
+// Script — trong khi âm thầm gọi server ở nền để lấy dữ liệu mới nhất và
+// cập nhật lại UI + cache khi có kết quả. Lần đầu tiên mở trang (chưa có
+// cache) vẫn phải chờ như bình thường.
+const LOCAL_CACHE_KEY = 'usvTapeCal_dataCache_v1';
+
+function applyServerData(data){
+  rows = data.rows || [];
+  signStates = data.signStates || {};
+  EMPLOYEES = (data.idList || [])
+    .map(e => {
+      const f = normalizeFactory(e[2], e[3]);
+      return f ? [e[0], e[1], f, e[3], e[4]] : null;
+    })
+    .filter(Boolean);
+  rebuildEmpIndex();
+  rebuildFactoryFilter();
+  const date = $('calDate').value;
+  signState = getSignState(date);
+  renderSignOff();
+  updateLockUI();
+  renderTable();
+}
+
+function readLocalCache_(){
+  try {
+    const raw = localStorage.getItem(LOCAL_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeLocalCache_(data){
+  try {
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify({
+      rows: data.rows || [], signStates: data.signStates || {}, idList: data.idList || [],
+      savedAt: Date.now()
+    }));
+  } catch (e) {
+    // localStorage đầy/không khả dụng (VD: private browsing) -> bỏ qua, không ảnh hưởng chức năng chính
+  }
+}
+
+// ---- Lớp "cache dùng chung" cho MỌI người dùng (không chỉ máy/trình duyệt đang mở) ----
+// Đọc thẳng dữ liệu từ Google Sheet qua endpoint công khai gviz/tq — do Google Sheets
+// phục vụ trực tiếp, KHÔNG chạy qua Apps Script nên không bị "cold start" (~1-3s+ mỗi lần).
+// CHỈ hoạt động khi Google Sheet được chia sẻ ở chế độ "Anyone with the link – Viewer".
+// Nếu chưa bật chia sẻ, các lệnh gọi này sẽ tự động timeout và bị bỏ qua trong im lặng —
+// trang vẫn hoạt động bình thường qua loadFromServer() như trước, không có gì bị hỏng.
+function gvizJSONP_(sheetName, range, timeoutMs){
+  return new Promise((resolve, reject) => {
+    const cbName = 'gvizCb_' + sheetName.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; cleanup(); reject(new Error('Timeout: ' + sheetName)); } }, timeoutMs || 4000);
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(resp){
+      if (done) return;
+      done = true;
+      cleanup();
+      resolve(resp);
+    };
+    const script = document.createElement('script');
+    script.src = 'https://docs.google.com/spreadsheets/d/' + PUBLIC_SNAPSHOT_SPREADSHEET_ID +
+      '/gviz/tq?tqx=out:json;responseHandler:' + cbName +
+      '&sheet=' + encodeURIComponent(sheetName) + '&range=' + encodeURIComponent(range);
+    script.onerror = () => { if (!done) { done = true; cleanup(); reject(new Error('Load failed: ' + sheetName)); } };
+    document.head.appendChild(script);
+  });
+}
+
+// Đọc giá trị 1 ô gviz: chuyển Date thật (do JSONP trả về, không phải chuỗi) sang 'yyyy-MM-dd'
+// để khớp định dạng ngày mà toàn bộ app đang dùng (giống formatDateVal_ bên Code.gs).
+function gvizCellValue_(cell){
+  if (!cell || cell.v === null || cell.v === undefined) return '';
+  const v = cell.v;
+  if (v instanceof Date){
+    const y = v.getFullYear();
+    const mo = String(v.getMonth() + 1).padStart(2, '0');
+    const d = String(v.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${d}`;
+  }
+  return String(v);
+}
+
+function fetchSharedSnapshot(){
+  if (!PUBLIC_SNAPSHOT_SPREADSHEET_ID) {
+    // Chưa cấu hình Sheet công khai -> bỏ qua ngay, không cần chờ timeout.
+    return Promise.reject(new Error('PUBLIC_SNAPSHOT_SPREADSHEET_ID chưa được cấu hình'));
+  }
+  return Promise.all([
+    // Bản snapshot công khai chỉ có 12 cột Entries (đã bỏ CheckedBy, Remark, RowId gốc
+    // được giữ ở cột đầu, CreatedAt) và 3 cột SignStates (đã bỏ Comment, UpdatedAt) —
+    // xem PUBLIC_ENTRY_HEADERS / PUBLIC_SIGN_HEADERS trong Code.gs.
+    gvizJSONP_(SHEET_ENTRIES, 'A2:L5000'),
+    gvizJSONP_(SHEET_SIGNSTATES, 'A2:C5000'),
+    gvizJSONP_(SHEET_IDLIST, 'A2:E5000')
+  ]).then(([entriesResp, signResp, idResp]) => {
+    const rows = ((entriesResp.table && entriesResp.table.rows) || [])
+      .map(r => r.c)
+      .filter(c => c && gvizCellValue_(c[0]))
+      .map(c => ({
+        rowId: gvizCellValue_(c[0]),
+        id: gvizCellValue_(c[1]),
+        fullName: gvizCellValue_(c[2]),
+        factory: gvizCellValue_(c[3]),
+        dept: gvizCellValue_(c[4]),
+        receivedDate: gvizCellValue_(c[5]),
+        qty: gvizCellValue_(c[6]),
+        calDate: gvizCellValue_(c[7]),
+        recalDate: gvizCellValue_(c[8]),
+        result: gvizCellValue_(c[9]),
+        tapeCondition: gvizCellValue_(c[10]),
+        replaceNew: gvizCellValue_(c[11]),
+        // checkedBy/remark không có trong bản snapshot công khai -> để trống tạm,
+        // sẽ được điền đầy đủ ngay khi loadFromServer() (Apps Script) trả về.
+        checkedBy: '',
+        remark: ''
+      }));
+    const signStates = {};
+    ((signResp.table && signResp.table.rows) || []).forEach(r => {
+      const c = r.c;
+      const calDate = c && gvizCellValue_(c[0]);
+      if (!calDate) return;
+      signStates[calDate] = {
+        status: gvizCellValue_(c[1]) || 'unsigned',
+        // comment không có trong bản snapshot công khai -> để trống tạm,
+        // sẽ được điền đầy đủ ngay khi loadFromServer() (Apps Script) trả về.
+        comment: '',
+        date: gvizCellValue_(c[2])
+      };
+    });
+    const idList = ((idResp.table && idResp.table.rows) || [])
+      .map(r => r.c)
+      .filter(c => c && gvizCellValue_(c[0]))
+      .map(c => [gvizCellValue_(c[0]), gvizCellValue_(c[1]), gvizCellValue_(c[2]), gvizCellValue_(c[3]), gvizCellValue_(c[4])]);
+    return { rows, signStates, idList };
+  });
+}
+
 function loadFromServer(cb, bypassCache){
   apiGet('getInitialData', bypassCache ? { bypassCache: 1 } : null)
     .then(data => {
-      rows = data.rows || [];
-      signStates = data.signStates || {};
-      EMPLOYEES = (data.idList || [])
-        .map(e => {
-          const f = normalizeFactory(e[2], e[3]);
-          return f ? [e[0], e[1], f, e[3], e[4]] : null;
-        })
-        .filter(Boolean);
-      rebuildEmpIndex();
-      rebuildFactoryFilter();
-      const date = $('calDate').value;
-      signState = getSignState(date);
-      renderSignOff();
-      updateLockUI();
-      renderTable();
+      applyServerData(data);
+      writeLocalCache_(data);
       if (typeof cb === 'function') cb();
     })
     .catch(err => {
@@ -993,6 +1138,20 @@ function loadFromServer(cb, bypassCache){
       if (typeof cb === 'function') cb();
     });
 }
+
+// 1) Hiển thị NGAY dữ liệu đã cache từ lần mở trước trên MÁY NÀY (nếu có) — tức thì.
+const cachedData = readLocalCache_();
+if (cachedData) {
+  applyServerData(cachedData);
+}
+// 2) Đọc nhanh từ Google Sheet (cache DÙNG CHUNG cho mọi người, mọi máy) — chỉ có tác
+//    dụng nếu Sheet đã được chia sẻ "Anyone with the link – Viewer"; nếu chưa, sẽ tự
+//    timeout và bị bỏ qua trong im lặng, không ảnh hưởng gì tới bước 3 bên dưới.
+fetchSharedSnapshot()
+  .then(data => { applyServerData(data); writeLocalCache_(data); })
+  .catch(() => { /* Sheet chưa public hoặc mạng lỗi -> bỏ qua, đã có bước 3 đảm nhiệm */ });
+// 3) Luôn gọi server (Apps Script) ở nền để lấy dữ liệu chính xác/mới nhất nhất
+//    (có khoá ghi, đảm bảo nhất quán); khi xong sẽ cập nhật UI + cache lần cuối.
 loadFromServer();
 
 // ---- Add row ----
