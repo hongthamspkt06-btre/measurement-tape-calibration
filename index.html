@@ -91,7 +91,7 @@
   #exportBtn{padding-top:8.8px;padding-bottom:8.8px;font-size:13px;}
   button.danger{background:#fff;border:1px solid var(--fail);color:var(--fail);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:15px;line-height:1;font-weight:700;}
   table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;}
-  th,td{border:1px solid var(--border);padding:7px 8px;text-align:center;}
+  th,td{border:1px solid var(--border);padding:6.65px 8px;text-align:center;}
   th{background:var(--blue-header2);color:var(--blue-dark);font-weight:700;position:sticky;top:0;z-index:2;box-shadow:0 1px 0 var(--border);}
   tr:nth-child(even){background:#fafcff;}
   .empty-note{padding:20px;text-align:center;color:#8a94a6;font-size:12px;}
@@ -105,7 +105,8 @@
   .status-msg.err{background:#fdecea;color:#d93025;display:block;}
 
   /* Entries list toolbar (search + factory filter) */
-  .list-toolbar{display:flex;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap;}
+  #entryListCard{padding:17.1px 20px;}
+  .list-toolbar{display:flex;gap:10px;align-items:center;margin:11.4px 0;flex-wrap:wrap;}
   .search-box{
     position:relative;flex:1;min-width:180px;
   }
@@ -119,12 +120,12 @@
   /* Entries panel */
   .panel-header{
     display:flex;align-items:center;justify-content:space-between;
-    padding-bottom:10px;margin-bottom:0;border-bottom:2px solid var(--blue-header2);
+    padding-bottom:9.5px;margin-bottom:0;
   }
   .panel-header h2{margin:0;}
   .panel-header-plain{border-bottom:none;padding-bottom:0;}
   .table-scroll{
-    max-height:245px;overflow-y:scroll;overflow-x:auto;margin-top:10px;border-radius:8px;
+    max-height:245px;overflow-y:scroll;overflow-x:auto;margin-top:9.5px;border-radius:8px;
     border:1px solid var(--border);
   }
   .table-scroll::-webkit-scrollbar{width:12px;}
@@ -175,13 +176,13 @@
   .card.card-compact-30 input[type=date]{padding:3.5px 10px;}
   .card.card-compact-30 .sig-box{min-height:26.1px;padding:3.2px 9px;}
 
-  .card.card-compact-25{padding:11.9px 20px;}
-  .card.card-compact-25 label{margin-bottom:3.4px;}
+  .card.card-compact-25{padding:11.3px 20px;}
+  .card.card-compact-25 label{margin-bottom:3.2px;}
   .card.card-compact-25 input[type=text],
   .card.card-compact-25 input[type=date],
-  .card.card-compact-25 select{padding:5.1px 10px;}
-  .card.card-compact-25 .btn-toggle{padding:6.8px 0;}
-  .card.card-compact-25 .actions{margin-top:13.6px;}
+  .card.card-compact-25 select{padding:4.8px 10px;}
+  .card.card-compact-25 .btn-toggle{padding:6.5px 0;}
+  .card.card-compact-25 .actions{margin-top:12.9px;}
   .card.card-compact-25 .grid5{gap:10px;}
   .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
   .entry-actions{display:flex;gap:8px;}
@@ -425,7 +426,7 @@
       </div>
     </div>
     <div class="lock-banner" id="lockBanner">🔒 This Calibration Date has been Approved (Done) and is locked. Select a different Calibration Date to keep entering data.</div>
-    <div class="grid5" style="margin-top:12px;">
+    <div class="grid5" style="margin-top:2px;">
       <div class="autocomplete">
         <label>ID</label>
         <input type="text" id="empId" placeholder="Type ID to search..." autocomplete="off">
@@ -448,7 +449,7 @@
         <input type="text" id="receivedDate" readonly placeholder="—">
       </div>
     </div>
-    <div class="grid5" style="margin-top:9.4px;">
+    <div class="grid5" style="margin-top:8.9px;">
       <div>
         <label>Qty</label>
         <select id="qty">
@@ -490,7 +491,7 @@
     <div class="status-msg" id="statusMsg"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="entryListCard">
     <div class="panel-header panel-header-plain">
       <h2>Entry List</h2>
       <span class="count-badge" id="countBadge">0 rows</span>
@@ -1114,10 +1115,10 @@ function updateTableScrollHeight(){
   const scrollBox = document.querySelector('.table-scroll');
   const theadEl = document.querySelector('#dataTable thead');
   if (!scrollBox || !theadEl) return;
-  const headerH = theadEl.offsetHeight || 62;
+  const headerH = theadEl.offsetHeight || 59;
   const trs = document.querySelectorAll('#tableBody tr');
   if (!trs.length){
-    scrollBox.style.maxHeight = (headerH + VISIBLE_ROWS * 30) + 'px';
+    scrollBox.style.maxHeight = (headerH + VISIBLE_ROWS * 28.5) + 'px';
     return;
   }
   const visibleCount = Math.min(VISIBLE_ROWS, trs.length);
